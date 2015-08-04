@@ -9,16 +9,16 @@ namespace SimpleMsgPack
     public enum MsgPackType
     {
         Unknown = 0,
-        Null    = 1,
-        Map     = 2,
-        Array   = 3,
-        String  = 4, 
-        Integer = 5,
-        UInt64  = 6,
-        Boolean = 7, 
-        Float   = 8, 
-        Single  = 9,
-        DateTime= 10,
-        Binary  = 11        
+        Null,
+        Map,
+        Array,
+        String,
+        Integer,
+        UInt64,
+        Boolean,
+        Single,
+        Double,
+        DateTime,
+        Binary,
     }
 }

@@ -109,16 +109,16 @@ namespace SimpleMsgPack
             ms.Write(rawBytes, 0, rawBytes.Length);
         }
 
+        public static void WriteFloat(Stream ms, Single fVal)
+        {
+            ms.WriteByte(0xCA);
+            ms.Write(BytesTools.SwapBytes(BitConverter.GetBytes(fVal)), 0, 4);
+        }
+
         public static void WriteFloat(Stream ms, Double fVal)
         {
             ms.WriteByte(0xCB);
             ms.Write(BytesTools.SwapDouble(fVal), 0, 8);
-        }
-
-        public static void WriteSingle(Stream ms, Single fVal)
-        {
-            ms.WriteByte(0xCA);
-            ms.Write(BytesTools.SwapBytes(BitConverter.GetBytes(fVal)), 0, 4);
         }
 
         public static void WriteBoolean(Stream ms, Boolean bVal)
@@ -129,6 +129,19 @@ namespace SimpleMsgPack
             }else
             {
                 ms.WriteByte(0xC2);
+            }
+        }
+        public static void WriteInteger(Stream ms, UInt64 iVal)
+        {
+            if (iVal <= Int64.MaxValue)
+            {
+                WriteInteger(ms, (Int64)iVal);
+            }
+            else
+            {
+                // Handles values between 0x7FFFFFFF_FFFFFFFF and 0xFFFFFFFF_FFFFFFFF 
+                ms.WriteByte(0xCF);
+                ms.Write(BytesTools.SwapUInt64(iVal), 0, 8);
             }
         }
         public static void WriteInteger(Stream ms, Int64 iVal)

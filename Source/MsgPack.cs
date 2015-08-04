@@ -76,6 +76,13 @@ namespace SimpleMsgPack
             return obj;
         }
 
+        public MsgPack Add(UInt64 value)
+        {
+            MsgPack obj = owner.AddArrayChild();
+            obj.SetAsUInt64(value);
+            return obj;
+        }
+
         public MsgPack Add(Double value)
         {
             MsgPack obj = owner.AddArrayChild();
@@ -265,18 +272,30 @@ namespace SimpleMsgPack
         {
             switch(this.valueType)
             {
+                case MsgPackType.UInt64:
                 case MsgPackType.Integer:
-                    return (Int64)this.innerValue;
+                    return Convert.ToInt64(this.innerValue);
                 case MsgPackType.String:
                     return Int64.Parse(this.innerValue.ToString().Trim());
-                case MsgPackType.Float:
-                    return Convert.ToInt64((Double)this.innerValue);
                 case MsgPackType.Single:
-                    return Convert.ToInt64((Single)this.innerValue);
+                    return Convert.ToInt64(this.innerValue);
+                case MsgPackType.Double:
+                    return Convert.ToInt64(this.innerValue);
                 case MsgPackType.DateTime:
                     return Convert.ToInt64((DateTime)this.innerValue);                   
                 default:
                     return 0;
+            }
+        }
+
+        public UInt64 GetAsUInt64()
+        {
+            switch (this.valueType)
+            {
+                case MsgPackType.UInt64:
+                    return Convert.ToUInt64(this.innerValue);
+                default:
+                    return Convert.ToUInt64(GetAsInteger());
             }
         }
 
@@ -285,13 +304,13 @@ namespace SimpleMsgPack
             switch (this.valueType)
             {
                 case MsgPackType.Integer:
-                    return Convert.ToDouble((Int64)this.innerValue);
+                    return Convert.ToDouble(this.innerValue);
                 case MsgPackType.String:
                     return Double.Parse((String)this.innerValue);
-                case MsgPackType.Float:
-                    return (Double)this.innerValue;
                 case MsgPackType.Single:
-                    return (Single)this.innerValue;
+                    return Convert.ToSingle(this.innerValue);
+                case MsgPackType.Double:
+                    return Convert.ToDouble(this.innerValue);
                 case MsgPackType.DateTime:
                     return Convert.ToInt64((DateTime)this.innerValue);
                 default:
@@ -310,14 +329,16 @@ namespace SimpleMsgPack
         {
             switch (this.valueType)
             {
+                case MsgPackType.UInt64:
+                    return BitConverter.GetBytes(Convert.ToUInt64(this.innerValue));
                 case MsgPackType.Integer:
-                    return BitConverter.GetBytes((Int64)this.innerValue);
+                    return BitConverter.GetBytes(Convert.ToInt64(this.innerValue));
                 case MsgPackType.String:
                     return BytesTools.GetUtf8Bytes(this.innerValue.ToString());
-                case MsgPackType.Float:
-                    return BitConverter.GetBytes((Double)this.innerValue);
                 case MsgPackType.Single:
-                    return BitConverter.GetBytes((Single)this.innerValue);
+                    return BitConverter.GetBytes(Convert.ToSingle(this.innerValue));
+                case MsgPackType.Double:
+                    return BitConverter.GetBytes(Convert.ToDouble(this.innerValue));
                 case MsgPackType.DateTime:
                     long dateval = ((DateTime)this.innerValue).ToBinary();
                     return BitConverter.GetBytes(dateval);
@@ -445,19 +466,17 @@ namespace SimpleMsgPack
             this.innerValue = bVal;
         }
 
-        public void SetAsSingle(Single fVal)
+        public void SetAsFloat(Single fVal)
         {
             this.valueType = MsgPackType.Single;
             this.innerValue = fVal;
         }
-        
+
         public void SetAsFloat(Double fVal)
         {
-            this.valueType = MsgPackType.Float;
+            this.valueType = MsgPackType.Double;
             this.innerValue = fVal;
         }
-
-        
 
         public void DecodeFromBytes(byte[] bytes)
         {
@@ -473,8 +492,6 @@ namespace SimpleMsgPack
             DecodeFromStream(fs);
             fs.Dispose();
         }
-            
-
 
         public void DecodeFromStream(Stream ms)
         {            
@@ -582,7 +599,7 @@ namespace SimpleMsgPack
                 ms.Read(rawByte, 0, 4);
                 rawByte = BytesTools.SwapBytes(rawByte);
                 
-                SetAsSingle(BitConverter.ToSingle(rawByte, 0));
+                SetAsFloat(BitConverter.ToSingle(rawByte, 0));
             }
             else if (lvByte == 0xCB)
             {  // float 64              
@@ -812,19 +829,22 @@ namespace SimpleMsgPack
                     WriteTools.WriteNull(ms);
                     break;
                 case MsgPackType.String:
-                    WriteTools.WriteString(ms, (String)this.innerValue);
+                    WriteTools.WriteString(ms, Convert.ToString(this.innerValue));
                     break;
                 case MsgPackType.Integer:
-                    WriteTools.WriteInteger(ms, (Int64)this.innerValue);
+                    WriteTools.WriteInteger(ms, Convert.ToInt64(this.innerValue));
+                    break;
+                case MsgPackType.UInt64:
+                    WriteTools.WriteInteger(ms, Convert.ToUInt64(this.innerValue));
                     break;
                 case MsgPackType.Boolean:
-                    WriteTools.WriteBoolean(ms, (Boolean)this.innerValue);
-                    break;
-                case MsgPackType.Float:
-                    WriteTools.WriteFloat(ms, (Double)this.innerValue);
+                    WriteTools.WriteBoolean(ms, Convert.ToBoolean(this.innerValue));
                     break;
                 case MsgPackType.Single:
-                    WriteTools.WriteFloat(ms, (Single)this.innerValue);
+                    WriteTools.WriteFloat(ms, Convert.ToSingle(this.innerValue));
+                    break;
+                case MsgPackType.Double:
+                    WriteTools.WriteFloat(ms, Convert.ToDouble(this.innerValue));
                     break;
                 case MsgPackType.DateTime:
                     WriteTools.WriteInteger(ms, GetAsInteger());
@@ -860,8 +880,14 @@ namespace SimpleMsgPack
         {
             get { return GetAsInteger(); }
             set { SetAsInteger((Int64)value); }
-        }   
-     
+        }
+
+        public UInt64 AsUInt64
+        {
+            get { return GetAsUInt64(); }
+            set { SetAsUInt64((UInt64)value); }
+        }
+
         public Double AsFloat
         {
             get { return GetAsFloat(); }

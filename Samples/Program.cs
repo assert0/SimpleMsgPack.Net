@@ -12,12 +12,12 @@ namespace SimpleMsgPackTester
     {
         static void Main(string[] args)
         {
-              
+
             //MsgPack simp = new MsgPack();
             //simp.DecodeFromFile("E:\\1.msgpack");
             //Console.WriteLine(simp.ForcePathObject("User.DB.System.DUID").AsInteger);
             //Console.ReadLine();
-   
+
 
             MsgPack msgpack = new MsgPack();
             msgpack.ForcePathObject("p.name").AsString = "张三";
@@ -25,8 +25,11 @@ namespace SimpleMsgPackTester
             msgpack.ForcePathObject("p.datas").AsArray.Add(90);
             msgpack.ForcePathObject("p.datas").AsArray.Add(80);
             msgpack.ForcePathObject("p.datas").AsArray.Add("李四");
-            msgpack.ForcePathObject("p.datas").AsArray.Add(3.1415926);
-            msgpack.ForcePathObject("Game.iGameID").AsInteger = 1;
+            msgpack.ForcePathObject("p.datas").AsArray.Add(Math.PI);
+            msgpack.ForcePathObject("Game.iGameID").AsInteger = -1;
+            msgpack.ForcePathObject("p.maxint64").AsUInt64 = Int64.MaxValue;
+            msgpack.ForcePathObject("p.maxuint64").AsUInt64 = UInt64.MaxValue;
+            msgpack.ForcePathObject("p.maxsingle").AsFloat = Single.MaxValue;
 
             // 可以直接打包文件数据
             // msgpack.ForcePathObject("p.filedata").LoadFileAsBytes("C:\\a.png");
@@ -59,6 +62,21 @@ namespace SimpleMsgPackTester
 
             Console.WriteLine(unpack_msgpack.ForcePathObject("Game.iGameID").AsInteger);
 
+            Console.WriteLine(unpack_msgpack.ForcePathObject("p.maxint64").AsInteger);
+
+            Console.WriteLine(unpack_msgpack.ForcePathObject("p.maxuint64").AsUInt64);
+
+            try
+            {
+                Console.WriteLine(unpack_msgpack.ForcePathObject("p.maxuint64").AsInteger);
+            }
+            catch (OverflowException e) { Console.WriteLine(e.Message); }
+
+            try
+            {
+                Console.WriteLine(unpack_msgpack.ForcePathObject("Game.iGameID").AsUInt64);
+            }
+            catch (OverflowException e) { Console.WriteLine(e.Message); }
             // unpack filedata 
             //unpack_msgpack.ForcePathObject("p.filedata").SaveBytesToFile("C:\\b.png");
             Console.Read();

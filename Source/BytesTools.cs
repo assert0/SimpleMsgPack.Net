@@ -74,6 +74,11 @@ namespace SimpleMsgPack
             return SwapBytes(BitConverter.GetBytes(v));
         }
 
+        public static byte[] SwapUInt64(UInt64 v)
+        {
+            return SwapBytes(BitConverter.GetBytes(v));
+        }
+
         public static byte[] SwapInt32(Int32 v)
         {
             byte[] r = new byte[4];
